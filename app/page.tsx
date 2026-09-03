@@ -8,6 +8,7 @@ import {
   RotateCcw,
   Star,
   Volume2,
+  VolumeX,
 } from "lucide-react";
 
 type Mode = "adult" | "child";
@@ -171,6 +172,7 @@ export default function Home() {
   const [pickedWord, setPickedWord] = useState<string | null>(null);
   const [matched, setMatched] = useState<string[]>([]);
   const [xp, setXp] = useState(120);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const lang = languages.find((l) => l.id === language);
   const questions =
     language === "thai"
@@ -196,6 +198,38 @@ export default function Home() {
     if (voice) utterance.voice = voice;
     window.speechSynthesis.speak(utterance);
   };
+  const playFeedbackSound = (correct: boolean) => {
+    if (!soundEnabled || typeof window === "undefined") return;
+    const AudioContextClass =
+      window.AudioContext ??
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const context = new AudioContextClass();
+    const notes = correct
+      ? mode === "child"
+        ? [523.25, 659.25, 783.99]
+        : [523.25, 659.25]
+      : [220, 196];
+
+    notes.forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const start = context.currentTime + index * 0.09;
+      oscillator.type = correct ? "sine" : "triangle";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(correct ? 0.12 : 0.055, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + 0.2);
+    });
+
+    window.setTimeout(() => void context.close(), 650);
+  };
   const start = () => {
     setPlaying(true);
     setStep(0);
@@ -209,8 +243,10 @@ export default function Home() {
   };
   const check = () => {
     if (selected === null) return;
+    const correct = Boolean(q && q.choices[selected] === q.swedish);
     setChecked(true);
-    if (q && q.choices[selected] === q.swedish) setScore((v) => v + 1);
+    playFeedbackSound(correct);
+    if (correct) setScore((v) => v + 1);
   };
   const next = () => {
     if (step === questions.length - 1 && language === "thai") {
@@ -227,7 +263,9 @@ export default function Home() {
   const chooseMeaning = (meaning: string) => {
     if (!pickedWord) return;
     const pair = thaiQuestions.find((item) => item.word === pickedWord);
-    if (pair?.swedish === meaning) setMatched((v) => [...v, pickedWord]);
+    const correct = pair?.swedish === meaning;
+    playFeedbackSound(correct);
+    if (correct) setMatched((v) => [...v, pickedWord]);
     setPickedWord(null);
   };
 
@@ -306,6 +344,13 @@ export default function Home() {
           <button className="icon-button" onClick={() => setPlaying(false)} aria-label="Stäng lektion"><ArrowLeft /></button>
           <div className="progress"><span style={{ width: "100%" }} /></div>
           <span className="heart"><Heart fill="currentColor" /> 5</span>
+          <button
+            className="sound-toggle"
+            onClick={() => setSoundEnabled((value) => !value)}
+            aria-label={soundEnabled ? "Stäng av effektljud" : "Slå på effektljud"}
+          >
+            {soundEnabled ? <Volume2 /> : <VolumeX />}
+          </button>
         </header>
         <section className="quiz-card match-card">
           <p className="step">Para ihop · bonusövning</p>
@@ -347,6 +392,14 @@ export default function Home() {
           <span className="heart">
             <Heart fill="currentColor" /> 5
           </span>
+          <button
+            className="sound-toggle"
+            onClick={() => setSoundEnabled((value) => !value)}
+            aria-label={soundEnabled ? "Stäng av effektljud" : "Slå på effektljud"}
+            title={soundEnabled ? "Effektljud på" : "Effektljud av"}
+          >
+            {soundEnabled ? <Volume2 /> : <VolumeX />}
+          </button>
         </header>
         {done ? (
           <section className="complete-card">
@@ -416,12 +469,17 @@ export default function Home() {
               >
                 <strong>
                   {q.choices[selected ?? -1] === q.swedish
-                    ? "Rätt!"
+                    ? "Rätt! +10 XP"
                     : "Nästan!"}
                 </strong>
                 <span>
                   {q.word} betyder “{q.swedish}”.
                 </span>
+                {q.choices[selected ?? -1] === q.swedish && mode === "child" && (
+                  <div className="reward-sparkles" aria-hidden="true">
+                    ★ ✨ ★
+                  </div>
+                )}
                 <button
                   className="tiny-sound"
                   onClick={() => speak(q.word)}
