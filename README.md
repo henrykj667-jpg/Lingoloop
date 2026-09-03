@@ -70,24 +70,7 @@ Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs o
 
 Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the OAuth cookies, and identity header injection. Do not implement app routes for those reserved paths. Routes that do not import and call the helper remain anonymous-compatible.
 
-SIWC establishes identity only; it does not prove workspace membership. Use the Sites hosting platform's access policy controls for workspace-wide restrictions, or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Diagnostic Commands
-
-- `npm run install:ci`: perform the one bounded lockfile install
-- `npm run dev`: start the Vite/Vinext development server
-- `npm run build`: build the deployable Sites artifact
-- `npm run start`: start the built Vinext application
-- `npm test`: build and verify the rendered development-preview metadata
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-Use build commands for targeted diagnosis after a remote failure, not as part of the normal checkpoint path.
-
-The timeout defaults can be overridden for a controlled canary with `SITES_INSTALL_TIMEOUT`, `SITES_INSTALL_KILL_AFTER`, `SITES_BUILD_TIMEOUT`, and `SITES_BUILD_KILL_AFTER`. A timeout fails the command; the helpers never retry an unchanged install or build.
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+SIWC establishes identity only; it does not prove workspace membership. Use the Sites hosting platforon6×­¢G§²ÚîÆ­yÙ^Âš[\Ü‹‹ÙÛØ˜[Ë˜ÜÜÈÂ‚™^ÜÛÛœİY]Y]NˆY]Y]HHÂˆ]Nˆ“[™ÛÓÛÜ8 $È0éˆYÈÜ°éZÈ‹ˆ\ØÜš\[Ûˆ’ÛÜK˜Zİ\ÚØHÜ°éZÛZİ[Û™\ˆ°íœˆ^˜HØÚ˜\›‹ˆ‹ˆXÛÛœÎˆÂˆXÛÛˆ‹Ù˜]šXÛÛ‹œİ™È‹ˆÚÜİ]ˆ‹Ù˜]šXÛÛ‹œİ™È‹ˆKŸNÂ‚™^ÜY˜][[˜İ[Ûˆ›Ûİ^[İ]
+ÂˆÚ[™[‹ŸNˆ™XYÛ›OÂˆÚ[™[ˆ™XXİ”™XXİ›ÙNÂŸOŠHÂˆ™]\›ˆ
+ˆ[[™ÏHœİˆ‚ˆ›ÙHÛ\ÜÓ˜[YOH˜[X[X\ÙYØÚ[™[ŸOØ›ÙO‚ˆÚ[‚ˆ
+NÂŸB
